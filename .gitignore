@@ -1,0 +1,15 @@
+Gemfile.lock
+
+coverage
+coverage.data
+rdoc
+doc
+.yardoc
+.bundle
+pkg
+*.gem
+tmp/*
+.DS_Store
+*.tmproj
+*.swp
+*.rbc
