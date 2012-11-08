@@ -188,6 +188,9 @@ class TestBirlingLogger < Test::Unit::TestCase
         :period => 1,
         :retain_period => retain_period
       )
+      
+      assert_equal true, File.exist?(path)
+      assert_equal true, File.symlink?(path)
 
       finish = Time.now + retain_period + 5
 

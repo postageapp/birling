@@ -244,7 +244,10 @@ protected
       
       if (File.exist?(@path) and File.symlink?(@path))
         File.unlink(@path)
-        File.symlink(@path, @current_path)
+      end
+
+      unless (File.exist?(@path))
+        File.symlink(@current_path, @path)
       end
       
       self.prune_logs!
