@@ -13,7 +13,7 @@ require 'rake'
 require 'jeweler'
 
 Jeweler::Tasks.new do |gem|
-  gem.name = "logroller"
+  gem.name = "birling"
   gem.homepage = "http://github.com/twg/birling"
   gem.license = "MIT"
   gem.summary = %Q{Logger with simple log rotation system}
