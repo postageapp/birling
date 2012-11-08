@@ -46,7 +46,7 @@ class TestBirlingLogger < Test::Unit::TestCase
     assert_equal "Test", output.read
   end
 
-  def test_debug_level
+  def test_default_level
     temp_path do |path|
       log = Birling::Logger.new(path)
     
@@ -63,6 +63,33 @@ class TestBirlingLogger < Test::Unit::TestCase
       current_size = log.size
       assert current_size > 0
     end
+  end
+  
+  def test_direct_write
+    output = StringIO.new
+  
+    log = Birling::Logger.new(output)
+    
+    log << "TEST"
+    
+    output.rewind
+    assert_equal "TEST", output.read
+  end
+  
+  def test_level_filter
+    output = StringIO.new
+  
+    log = Birling::Logger.new(
+      output,
+      :formatter => lambda { |s, t, p, m| "#{m}\n" },
+      :severity => :info
+    )
+    
+    log.debug("DEBUG")
+    log.info("INFO")
+    
+    output.rewind
+    assert_equal "INFO\n", output.read
   end
 
   def test_reopen
@@ -88,27 +115,89 @@ class TestBirlingLogger < Test::Unit::TestCase
     end
   end
   
+  def test_time_source
+    temp_path do |path|
+      frozen_time = Time.now
+      Time::Warped.now = frozen_time
+      
+      logger = Birling::Logger.new(path, :time_source => Time::Warped)
+      
+      assert_equal frozen_time, logger.time_source.now
+    end
+  end
+  
   def test_cycling
     temp_path(:cycle) do |path|
       start = Time.now
-      logger = Birling::Logger.new(path, :period => 1)
+      Time::Warped.now = start
+      logger = Birling::Logger.new(path, :period => 1, :time_source => Time::Warped)
       
       assert_equal 1, logger.period
       
       current_path = logger.current_path
       assert_equal '%s', logger.path_time_format
+    
+      logger.debug("Test")
       
-      assert_equal 1, (logger.rotation_time - start).to_i
+      Time::Warped.now += 1
       
-      while (logger.current_path == current_path)
+      logger.debug("Test")
+
+      assert_not_equal current_path, logger.current_path
+      
+      current_path = logger.current_path
+
+      Time::Warped.now += 1
+      
+      logger.debug("Test")
+      
+      assert_not_equal current_path, logger.current_path
+    end
+  end
+  
+  def test_retain_count
+    temp_path(:cycle) do |path|
+      start = Time.now
+      Time::Warped.now = start
+      
+      retain_count = 10
+
+      logger = Birling::Logger.new(
+        path,
+        :period => 1,
+        :time_source => Time::Warped,
+        :retain_count => retain_count
+      )
+
+      (retain_count + 5).times do |n|
         logger.debug("Test")
-        
-        elapsed = Time.now - start
-        
-        assert elapsed < 3
+        Time::Warped.now += 1
+        logger.debug("Test")
       end
       
-    ensure
+      assert_equal retain_count, Dir.glob(logger.path_format % '*').length
+    end
+  end
+
+  def test_retain_period
+    temp_path(:cycle) do |path|
+      retain_period = 3
+      
+      logger = Birling::Logger.new(
+        path,
+        :period => 1,
+        :retain_period => retain_period
+      )
+
+      finish = Time.now + retain_period + 5
+
+      while (Time.now < finish)
+        logger.debug("Test")
+        Time::Warped.now += 1
+        logger.debug("Test")
+      end
+      
+      assert_equal retain_period + 1, Dir.glob(logger.path_format % '*').length
     end
   end
 end

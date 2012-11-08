@@ -26,7 +26,7 @@ class Birling::Logger
   
   # == Properties ===========================================================
 
-  attr_accessor :severity
+  attr_reader :severity
   attr_accessor :formatter
   attr_accessor :program
   attr_accessor :time_source
@@ -41,18 +41,31 @@ class Birling::Logger
   
   # == Class Methods ========================================================
   
+  def self.severity(value)
+    case (value)
+    when Symbol
+      SEVERITY[value] or DEFAULT_SEVERITY
+    when String
+      SEVERITY[value.to_sym] or DEFAULT_SEVERITY
+    when Fixnum
+      SEVERITY_LABEL[value] and value or DEFAULT_SEVERITY
+    else
+      DEFAULT_SEVERITY
+    end
+  end
+  
   # == Instance Methods =====================================================
 
   def initialize(log, options = nil)
     @period = (options and options[:period])
+    @severity = self.class.severity(options && options[:severity])
     @retain_count = (options and options[:retain_count])
     @retain_period = (options and options[:retain_period])
     @formatter = (options and options[:formatter] or Birling::Formatter)
     @program = (options and options[:program] or nil)
     @time_source = (options and options[:time_source] or Time)
-    @severity = (options and (options[:level] or options[:severity]) or DEFAULT_SEVERITY)
     @path_format = (options and options[:path_format])
-    
+
     case (log)
     when IO, StringIO
       @log = log
@@ -78,6 +91,10 @@ class Birling::Logger
     yield(self) if (block_given?)
   end
   
+  def severity=(value)
+    @severity = self.class.severity(value)
+  end
+  
   def can_rotate?
     !!@path
   end
@@ -99,14 +116,7 @@ class Birling::Logger
   def log(level, message = nil, program = nil)
     return unless (@log)
     
-    case (level)
-    when Symbol
-      level = SEVERITY[level] || DEFAULT_SEVERITY
-    else
-      level = level.to_i
-    end
-    
-    level = SEVERITY_LABEL[level] ? level : DEFAULT_SEVERITY
+    level = self.class.severity(level)
     program ||= @program
 
     self.check_log_rotation!
@@ -129,7 +139,7 @@ class Birling::Logger
     end
     
     define_method(name) do |message = nil, program = nil|
-      return unless (@log)
+      return unless (@log and @severity >= level)
       
       program ||= @program
       
@@ -184,6 +194,38 @@ protected
     end
   end
   
+  def prune_logs!
+    return unless (@path and (@retain_period or @retain_count))
+    
+    log_spec = @path.sub(/\.(\w+)$/, '*')
+    
+    logs = (Dir.glob(log_spec) - [ @path ]).collect do |p|
+      stat = File.stat(p)
+      create_time = (stat and stat.ctime or @time_source.now)
+      
+      [ p, create_time ]
+    end.sort_by do |r|
+      r[1] || @time_source.now
+    end
+    
+    if (@retain_period)
+      logs.reject! do |r|
+        if (Time.now - r[1] > @retain_period)
+          FileUtils.rm_f(r[0])
+        end
+      end
+    end
+    
+    if (@retain_count)
+      # The logs array is sorted from oldest to newest, so retaining the N
+      # newest entries entails stripping them off the end with pop.
+
+      logs.pop(@retain_count)
+      
+      FileUtils.rm_f(logs.collect { |r| r[0] })
+    end
+  end
+  
   def check_log_rotation!
     return unless (@rotation_time)
     
@@ -204,6 +246,8 @@ protected
         File.unlink(@path)
         File.symlink(@path, @current_path)
       end
+      
+      self.prune_logs!
     else
       @current_path = @path
       

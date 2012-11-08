@@ -17,6 +17,16 @@ $LOAD_PATH.unshift(File.dirname(__FILE__))
 
 require 'birling'
 
+class Time::Warped < Time
+  def self.now
+    @now || super
+  end
+  
+  def self.now=(value)
+    @now = value
+  end
+end
+
 class Test::Unit::TestCase
   def in_time_zone(zone)
     tz = ENV['TZ']
@@ -54,9 +64,9 @@ class Test::Unit::TestCase
       begin
         yield(full_path)
       ensure
-        if (File.exist?(full_path))
-          File.unlink(full_path)
-        end
+        remove_spec = File.expand_path('*', @temp_path)
+        
+        FileUtils.rm_f(Dir.glob(remove_spec))
       end
     end
     
