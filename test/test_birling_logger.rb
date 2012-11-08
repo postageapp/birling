@@ -178,6 +178,22 @@ class TestBirlingLogger < Test::Unit::TestCase
       assert_equal retain_count, Dir.glob(logger.path_format % '*').length
     end
   end
+  
+  def test_default_formatter
+    temp_path(:cycle) do |path|
+      logger = Birling::Logger.new(path)
+      
+      lines = 100
+      
+      lines.times do
+        logger.debug("Test")
+      end
+      
+      logger.close
+      
+      assert_equal lines, File.readlines(path).length
+    end
+  end
 
   def test_retain_period
     temp_path(:cycle) do |path|

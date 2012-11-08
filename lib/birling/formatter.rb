@@ -7,9 +7,9 @@ module Birling::Formatter
 
   def self.call(severity, time, program, message)
     if (program)
-      "[#{time.strftime(TIME_FORMAT_DEFAULT)}] <#{program}> #{message}"
+      "[#{time.strftime(TIME_FORMAT_DEFAULT)}] <#{program}> #{message}\n"
     else
-      "[#{time.strftime(TIME_FORMAT_DEFAULT)}] #{message}"
+      "[#{time.strftime(TIME_FORMAT_DEFAULT)}] #{message}\n"
     end
   end
 end

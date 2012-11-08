@@ -241,6 +241,7 @@ protected
       @current_path = @time_source.now.strftime(@path_format)
       
       @log = File.open(@current_path, 'a')
+      @log.sync = true
       
       if (File.exist?(@path) and File.symlink?(@path))
         File.unlink(@path)
