@@ -57,6 +57,7 @@ class Birling::Logger
   # == Instance Methods =====================================================
 
   def initialize(log, options = nil)
+    @encoding = (options and options[:encoding])
     @period = (options and options[:period])
     @severity = self.class.severity(options && options[:severity])
     @retain_count = (options and options[:retain_count])
@@ -65,6 +66,12 @@ class Birling::Logger
     @program = (options and options[:program] or nil)
     @time_source = (options and options[:time_source] or Time)
     @path_format = (options and options[:path_format])
+
+    @file_open_options = { }
+
+    if (@encoding)
+      @file_open_options[:encoding] = @encoding
+    end
 
     case (log)
     when IO, StringIO
@@ -240,7 +247,7 @@ protected
     if (@path_format)
       @current_path = @time_source.now.strftime(@path_format)
       
-      @log = File.open(@current_path, 'a')
+      @log = File.open(@current_path, 'a', @file_open_options)
       @log.sync = true
       
       if (File.exist?(@path) and File.symlink?(@path))
@@ -255,7 +262,7 @@ protected
     else
       @current_path = @path
       
-      @log = File.open(@current_path, 'a')
+      @log = File.open(@current_path, 'a', @file_open_options)
     end
   end
 end

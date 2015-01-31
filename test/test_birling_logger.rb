@@ -219,4 +219,14 @@ class TestBirlingLogger < Test::Unit::TestCase
       assert_equal retain_period + 1, Dir.glob(logger.path_format % '*').length
     end
   end
+
+  def test_irregular_utf8_data
+    temp_path(:cycle) do |path|
+      logger = Birling::Logger.new(path, encoding: 'BINARY')
+
+      invalid = (0..255).to_a.pack('C*')
+
+      logger.debug(invalid)
+    end    
+  end
 end
