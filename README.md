@@ -34,8 +34,8 @@ of ten hourly logs:
 ```ruby
 logger = Birling.open(
   'test.log',
-  :period => :hourly,
-  :retain_count => 10
+  period: :hourly,
+  retain_count: 10
 )
 ```
 
@@ -46,8 +46,8 @@ that period will be removed:
 ```ruby
 logger = Birling.open(
   'test.log',
-  :period => :hourly,
-  :retain_period => 10 * 3600
+  period: :hourly,
+  retain_period: 10 * 3600
 )
 ```
 
@@ -60,7 +60,7 @@ Example:
 ```ruby
 logger = Birling.open(
   'test.log',
-  :formatter => lambda { |severity, time, program, message| "#{time}> #{message}\n" }
+  formatter: lambda { |severity, time, program, message| "#{time}> #{message}\n" }
 )
 ```
 
@@ -76,4 +76,4 @@ using `STDOUT` the logger will not rotate.
 
 ## Copyright
 
-Copyright (c) 2011-2012 Scott Tadman, The Working Group Inc.
+Copyright (c) 2011-2015 Scott Tadman, The Working Group Inc.
