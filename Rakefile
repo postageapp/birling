@@ -14,7 +14,7 @@ require 'jeweler'
 
 Jeweler::Tasks.new do |gem|
   gem.name = "birling"
-  gem.homepage = "http://github.com/twg/birling"
+  gem.homepage = "http://github.com/postageapp/birling"
   gem.license = "MIT"
   gem.summary = %Q{Logger with simple log rotation system}
   gem.description = %Q{Mostly drop-in replacement for Logger with a more robust log rotation facility}

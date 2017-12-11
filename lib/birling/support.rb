@@ -1,4 +1,6 @@
 module Birling::Support
+  # == Module + Mixin Methods ===============================================
+
   def next_day(time, time_source = nil)
     (time_source || Time).local(
       time.year,

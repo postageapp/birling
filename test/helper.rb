@@ -54,9 +54,9 @@ class Test::Unit::TestCase
       name = "#{name}.log"
     end
     
-    @temp_path ||= File.expand_path('../tmp', File.dirname(__FILE__))
+    temp_path ||= File.expand_path('../tmp', File.dirname(__FILE__))
     
-    full_path = File.expand_path(name, @temp_path)
+    full_path = File.expand_path(name, temp_path)
     
     FileUtils::mkdir_p(File.dirname(full_path))
     
@@ -64,7 +64,7 @@ class Test::Unit::TestCase
       begin
         yield(full_path)
       ensure
-        remove_spec = File.expand_path('*', @temp_path)
+        remove_spec = File.expand_path('*', temp_path)
         
         FileUtils.rm_f(Dir.glob(remove_spec))
       end

@@ -35,17 +35,4 @@ class TestBirling < Test::Unit::TestCase
     
     assert !File.exist?(_path)
   end
-  
-  def test_time_warped
-    _now = Time.now
-    
-    Time::Warped.now = _now
-
-    assert_not_equal Time.now, Time.now
-    assert_equal _now, Time::Warped.now
-    
-    Time::Warped.now = nil
-    
-    assert_not_equal _now, Time::Warped.now
-  end
 end

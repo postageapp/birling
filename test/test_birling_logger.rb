@@ -27,6 +27,35 @@ class TestBirlingLogger < Test::Unit::TestCase
     
     assert_equal 0, log.size
   end
+
+  def test_io_compatible
+    stdout = $stdout
+
+    buffer = StringIO.new
+
+    log = Birling::Logger.new(buffer, time_source: Time::Warped)
+    
+    assert log.opened?
+    
+    assert_equal 0, log.size
+
+    $stdout = log
+
+    start = Time.parse('2017-10-10 12:00:00')
+
+    Time::Warped.now = start
+
+    puts "Test"
+
+    log.close
+
+    expected = "[2017-10-10 12:00:00] Test\n"
+
+    assert_equal expected, buffer.string.to_s
+
+  ensure
+    $stdout = stdout
+  end
   
   def test_formatter
     formatter_called = false
@@ -36,7 +65,7 @@ class TestBirlingLogger < Test::Unit::TestCase
     end
     
     output = StringIO.new
-    log = Birling::Logger.new(output, :formatter => formatter)
+    log = Birling::Logger.new(output, formatter: formatter)
     
     log.debug("Test")
     
@@ -72,8 +101,7 @@ class TestBirlingLogger < Test::Unit::TestCase
     
     log << "TEST"
     
-    output.rewind
-    assert_equal "TEST", output.read
+    assert_equal "TEST", output.string
   end
   
   def test_level_filter
@@ -81,8 +109,8 @@ class TestBirlingLogger < Test::Unit::TestCase
   
     log = Birling::Logger.new(
       output,
-      :formatter => lambda { |s, t, p, m| "#{m}\n" },
-      :severity => :info
+      formatter: lambda { |s, t, p, m| "#{m}\n" },
+      severity: :info
     )
     
     log.debug("DEBUG")
@@ -120,7 +148,7 @@ class TestBirlingLogger < Test::Unit::TestCase
       frozen_time = Time.now
       Time::Warped.now = frozen_time
       
-      logger = Birling::Logger.new(path, :time_source => Time::Warped)
+      logger = Birling::Logger.new(path, time_source: Time::Warped)
       
       assert_equal frozen_time, logger.time_source.now
     end
@@ -130,7 +158,7 @@ class TestBirlingLogger < Test::Unit::TestCase
     temp_path(:cycle) do |path|
       start = Time.now
       Time::Warped.now = start
-      logger = Birling::Logger.new(path, :period => 1, :time_source => Time::Warped)
+      logger = Birling::Logger.new(path, period: 1, time_source: Time::Warped)
       
       assert_equal 1, logger.period
       
@@ -164,14 +192,16 @@ class TestBirlingLogger < Test::Unit::TestCase
 
       logger = Birling::Logger.new(
         path,
-        :period => 1,
-        :time_source => Time::Warped,
-        :retain_count => retain_count
+        period: 1,
+        time_source: Time::Warped,
+        retain_count: retain_count
       )
 
       (retain_count + 5).times do |n|
         logger.debug("Test")
+
         Time::Warped.now += 1
+
         logger.debug("Test")
       end
       
@@ -201,8 +231,8 @@ class TestBirlingLogger < Test::Unit::TestCase
       
       logger = Birling::Logger.new(
         path,
-        :period => 1,
-        :retain_period => retain_period
+        period: 1,
+        retain_period: retain_period
       )
       
       assert_equal true, File.exist?(path)

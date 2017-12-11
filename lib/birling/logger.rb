@@ -3,15 +3,15 @@ class Birling::Logger
   
   # These level constants are the same as the syslog system utility
   SEVERITY = {
-    :emergency => EMERGENCY = 0,
-    :alert => ALERT = 1,
-    :critical => CRITICAL = 2,
-    :error => ERROR = 3,
-    :warning => WARNING = 4,
-    :notice => NOTICE = 5,
-    :info => INFO = 6,
-    :debug => DEBUG = 7,
-    :unknown => UNKNOWN = 999
+    emergency: EMERGENCY = 0,
+    alert: ALERT = 1,
+    critical: CRITICAL = 2,
+    error: ERROR = 3,
+    warning: WARNING = 4,
+    notice: NOTICE = 5,
+    info: INFO = 6,
+    debug: DEBUG = 7,
+    unknown: UNKNOWN = 999
   }.freeze
   
   DEFAULT_SEVERITY = UNKNOWN
@@ -19,9 +19,9 @@ class Birling::Logger
   SEVERITY_LABEL = SEVERITY.invert.freeze
   
   PATH_TIME_DEFAULT = {
-    :hourly => '%Y%m%d%H'.freeze,
-    :daily => '%Y%m%d'.freeze,
-    :default => '%s'.freeze
+    hourly: '%Y%m%d%H'.freeze,
+    daily: '%Y%m%d'.freeze,
+    default: '%s'.freeze
   }.freeze
   
   # == Properties ===========================================================
@@ -47,7 +47,7 @@ class Birling::Logger
       SEVERITY[value] or DEFAULT_SEVERITY
     when String
       SEVERITY[value.to_sym] or DEFAULT_SEVERITY
-    when Fixnum
+    when Integer
       SEVERITY_LABEL[value] and value or DEFAULT_SEVERITY
     else
       DEFAULT_SEVERITY
@@ -68,6 +68,10 @@ class Birling::Logger
     @path_format = (options and options[:path_format])
 
     @file_open_options = { }
+
+    @rotation_time = nil
+    @path = nil
+    @log = nil
 
     if (@encoding)
       @file_open_options[:encoding] = @encoding
@@ -106,10 +110,6 @@ class Birling::Logger
     !!@path
   end
   
-  def size
-    @log and @log.respond_to
-  end
-  
   def retain=(value)
     @retain = value ? value.to_i : nil
     
@@ -120,6 +120,12 @@ class Birling::Logger
     @retain_period
   end
   
+  def write(message)
+    return unless (message.match(/\S/))
+
+    self.log(:debug, message.chomp)
+  end
+
   def log(level, message = nil, program = nil)
     return unless (@log)
     
@@ -190,7 +196,7 @@ class Birling::Logger
 protected
   def next_rotation_time
     case (@period)
-    when Fixnum, Float
+    when Integer, Float
       @time_source.now + @period
     when :daily
       Birling::Support.next_day(@time_source.now)
@@ -250,7 +256,7 @@ protected
       @log = File.open(@current_path, 'a', @file_open_options)
       @log.sync = true
       
-      if (File.exist?(@path) and File.symlink?(@path))
+      if (File.symlink?(@path))
         File.unlink(@path)
       end
 
