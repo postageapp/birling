@@ -2,8 +2,10 @@ require File.expand_path('helper', File.dirname(__FILE__))
 
 class TestBirlingSupport < Test::Unit::TestCase
   def test_next_day_on_dst_flip
-    in_time_zone('UTC') do
+    in_time_zone('EST5EDT') do
       time = Time.new(2012, 11, 4)
+
+      assert_equal 'EDT', time.zone
       
       assert_equal time.day, (time + 86400).day
       
@@ -19,8 +21,10 @@ class TestBirlingSupport < Test::Unit::TestCase
   end
 
   def test_hour_day_on_dst_flip
-    in_time_zone('UTC') do
+    in_time_zone('EST5EDT') do
       time = Time.new(2012, 11, 4, 0, 59, 59) + 1
+
+      assert_equal 'EDT', time.zone
       
       assert_equal time.hour, (time + 3600).hour
       
@@ -38,8 +42,10 @@ class TestBirlingSupport < Test::Unit::TestCase
   end
 
   def test_next_day_at_year_end
-    in_time_zone('UTC') do
+    in_time_zone('EST5EDT') do
       time = Time.new(2012, 12, 31)
+
+      assert_equal 'EST', time.zone
       
       next_day = Birling::Support.next_day(time)
       
