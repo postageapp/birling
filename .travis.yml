@@ -6,3 +6,5 @@ rvm:
   - 2.2.0
   - 2.3.3
   - 2.4.2
+before_install:
+- export TZ=EST5EDT
