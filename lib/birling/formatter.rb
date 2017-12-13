@@ -7,10 +7,12 @@ module Birling::Formatter
 
   # == Module Methods =======================================================
 
+  # Default time formatter method.
   def self.time_format(time)
     (time || Time.now).strftime(TIME_FORMAT_DEFAULT)
   end
 
+  # Implementation for a plug-in Logger formatter.
   def self.call(severity, time, program, message)
     if (program)
       "[#{time.strftime(TIME_FORMAT_DEFAULT)}] <#{program}> #{message}\n"

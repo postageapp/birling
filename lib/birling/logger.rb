@@ -56,6 +56,7 @@ class Birling::Logger
   
   # == Instance Methods =====================================================
 
+  # Use Birling.open(...) to create new instances.
   def initialize(log, options = nil)
     @encoding = (options and options[:encoding])
     @period = (options and options[:period])
@@ -102,14 +103,21 @@ class Birling::Logger
     yield(self) if (block_given?)
   end
   
+  # Sets the severity filter for logging. Any messages with a lower severity
+  # will be ignored. Any invalid severity options will reset the severity
+  # filter to defaults.
   def severity=(value)
     @severity = self.class.severity(value)
   end
   
+  # Returns true if the log can be rotated, false otherwise.
   def can_rotate?
     !!@path
   end
   
+  # Sets the retention interval for log files. Value should respond to to_i
+  # and yield an integer value that's a positive number of seconds between
+  # rotation operations.
   def retain=(value)
     @retain = value ? value.to_i : nil
     
@@ -120,6 +128,8 @@ class Birling::Logger
     @retain_period
   end
   
+  # An IO compatible method for writing a message to the file. Only non-empty
+  # messages are actually logged.
   def write(message)
     return unless (message.match(/\S/))
 
@@ -134,6 +144,8 @@ class Birling::Logger
     # Auto-sync is always turned on, so this operation is ignored.
   end
 
+  # Log the message for the (optional) program at the given log level. No
+  # data will be written if the current log level is not sufficiently high.
   def log(level, message = nil, program = nil)
     return unless (@log)
     
@@ -146,6 +158,7 @@ class Birling::Logger
   end
   alias_method :add, :log
 
+  # Writes to the log file regardless of log level.
   def <<(message)
     return unless (@log)
     
@@ -154,6 +167,11 @@ class Birling::Logger
     @log.write(message)
   end
   
+  # Each of the severity levels has an associated method name. For example:
+  # * debug? - Returns true if the logging level is at least debug, false
+  #            otherwise.
+  # * debug(message, program = nil) - Used to log a message with an optional
+  #                                   program name.
   SEVERITY.each do |name, level|
     define_method(:"#{name}?") do
       @severity >= level
@@ -174,6 +192,7 @@ class Birling::Logger
     end
   end
 
+  # Closes the log.
   def close
     return unless (@log)
     
@@ -181,24 +200,29 @@ class Birling::Logger
     @log = nil
   end
   
+  # Returns true if the log is opened, false otherwise.
   def opened?
     !!@log
   end
 
+  # Returns true if the log is closed, false otherwise.
   def closed?
     !@log
   end
 
+  # Returns the creation time of the log if opened, nil otherwise.
   def create_time
     @log and @log.ctime
   end
   
+  # Returns size of the log if opened, nil otherwise.
   def size
     @log and @log.size
   end
    
+  # Returns the age of the log file in seconds if opened, nil otherwise.
   def age(relative_to = nil)
-    (relative_to || @time_source.now) - @log.ctime
+    @log and (relative_to || @time_source.now) - @log.ctime
   end
   
 protected
