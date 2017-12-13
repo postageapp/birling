@@ -126,6 +126,14 @@ class Birling::Logger
     self.log(:debug, message.chomp)
   end
 
+  def sync=(sync)
+    # Auto-sync is always turned on, so this operation is ignored.
+  end
+
+  def flush
+    # Auto-sync is always turned on, so this operation is ignored.
+  end
+
   def log(level, message = nil, program = nil)
     return unless (@log)
     
