@@ -60,7 +60,7 @@ Example:
 ```ruby
 logger = Birling.open(
   'test.log',
-  formatter: lambda { |severity, time, program, message| "#{time}> #{message}\n" }
+  formatter: -> (severity, time, program, message) { "#{time}> #{message}\n" }
 )
 ```
 
