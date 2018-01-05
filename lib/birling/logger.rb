@@ -301,6 +301,8 @@ protected
       @current_path = @path
       
       @log = File.open(@current_path, 'a', @file_open_options)
+
+      @log.sync = true
     end
   end
 end
