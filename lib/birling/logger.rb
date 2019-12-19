@@ -158,6 +158,12 @@ class Birling::Logger
   end
   alias_method :add, :log
 
+  def puts(*args)
+    args.each do |arg|
+      self.log(:debug, arg)
+    end
+  end
+
   # Writes to the log file regardless of log level.
   def <<(message)
     return unless (@log)

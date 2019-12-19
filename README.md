@@ -76,4 +76,4 @@ using `STDOUT` the logger will not rotate.
 
 ## Copyright
 
-Copyright (c) 2011-2017 Scott Tadman, PostageApp, The Working Group Inc.
+Copyright (c) 2011-2019 Scott Tadman, PostageApp Ltd.
