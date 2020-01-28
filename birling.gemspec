@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0".freeze) if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib".freeze]
   s.authors = ["Scott Tadman".freeze]
-  s.date = "2019-12-19"
+  s.date = "2020-01-28"
   s.description = "Mostly drop-in replacement for Logger with a more robust log rotation facility".freeze
   s.email = "github@tadman.ca".freeze
   s.extra_rdoc_files = [
@@ -38,21 +38,17 @@ Gem::Specification.new do |s|
   ]
   s.homepage = "http://github.com/postageapp/birling".freeze
   s.licenses = ["MIT".freeze]
-  s.rubygems_version = "3.0.6".freeze
+  s.rubygems_version = "3.1.2".freeze
   s.summary = "Logger with simple log rotation system".freeze
 
   if s.respond_to? :specification_version then
     s.specification_version = 4
+  end
 
-    if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
-      s.add_development_dependency(%q<bundler>.freeze, [">= 0"])
-      s.add_development_dependency(%q<test-unit>.freeze, [">= 0"])
-      s.add_development_dependency(%q<jeweler>.freeze, [">= 0"])
-    else
-      s.add_dependency(%q<bundler>.freeze, [">= 0"])
-      s.add_dependency(%q<test-unit>.freeze, [">= 0"])
-      s.add_dependency(%q<jeweler>.freeze, [">= 0"])
-    end
+  if s.respond_to? :add_runtime_dependency then
+    s.add_development_dependency(%q<bundler>.freeze, [">= 0"])
+    s.add_development_dependency(%q<test-unit>.freeze, [">= 0"])
+    s.add_development_dependency(%q<jeweler>.freeze, [">= 0"])
   else
     s.add_dependency(%q<bundler>.freeze, [">= 0"])
     s.add_dependency(%q<test-unit>.freeze, [">= 0"])
