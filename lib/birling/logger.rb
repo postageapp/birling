@@ -1,3 +1,5 @@
+require 'fileutils'
+
 class Birling::Logger
   # == Constants ============================================================
 
